@@ -43,7 +43,7 @@ export const getUserByEmailController = async (
 ): Promise<void> => {
   try {
     const { email } = req.params;
-    const user = await getUserByEmailService(email);
+    const user = await getUserByEmailService(email as string);
 
     if (!user) {
       res.status(404).json({
@@ -74,7 +74,7 @@ export const getUserByUsernameController = async (
   try {
     const { username } = req.params;
     const user = await getUserByUsernameService(
-      username
+      username as string
     );
 
     if (!user) {
@@ -105,7 +105,7 @@ export const getUserByIdController = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
-    const user = await getUserByIdService(userId);
+    const user = await getUserByIdService(userId as string);
 
     if (!user) {
       res.status(404).json({
@@ -155,7 +155,7 @@ export const updateUserController = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
-    const user = await updateUserService(userId, req.body);
+    const user = await updateUserService(userId as string, req.body);
 
     res.status(200).json({
       success: true,
@@ -178,7 +178,7 @@ export const deleteUserController = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
-    await deleteUserService(userId);
+    await deleteUserService(userId as string);
 
     res.status(200).json({
       success: true,
@@ -200,7 +200,7 @@ export const verifyUserController = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
-    await verifyUserService(userId);
+    await verifyUserService(userId as string);
 
     res.status(200).json({
       success: true,
@@ -222,7 +222,7 @@ export const deactivateUserController = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
-    await deactivateUserService(userId);
+    await deactivateUserService(userId as string);
 
     res.status(200).json({
       success: true,
@@ -244,7 +244,7 @@ export const activateUserController = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
-    await activateUserService(userId);
+    await activateUserService(userId as string);
 
     res.status(200).json({
       success: true,
@@ -270,7 +270,7 @@ export const getUserStatsController = async (
 ): Promise<void> => {
   try {
     const { userId } = req.params;
-    const stats = await getUserStatsService(userId);
+    const stats = await getUserStatsService(userId as string);
 
     if (!stats) {
       res.status(404).json({
@@ -300,7 +300,7 @@ export const getSellerStatsController = async (
 ): Promise<void> => {
   try {
     const { sellerId } = req.params;
-    const stats = await getSellerStatsService(sellerId);
+    const stats = await getSellerStatsService(sellerId as string);
 
     if (!stats) {
       res.status(404).json({

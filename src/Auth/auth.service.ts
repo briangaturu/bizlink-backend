@@ -1,59 +1,108 @@
-import { eq } from "drizzle-orm";
-import db from "../drizzle/db";
-import { users } from "../drizzle/schema";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import {
+  createUserService,
+  getUserByEmailService,
+  getUserByIdService,
+  updateUserPasswordService,
+} from "../Users/users.service";
 
-export type TUserInsert = typeof users.$inferInsert;
-export type TUserSelect = typeof users.$inferSelect;
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "access_secret";
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "refresh_secret";
 
-// Create User
-export const createUserServices = async (
-user: TUserInsert
-): Promise<TUserSelect> => {
-const [createdUser] = await db
-.insert(users)
-.values(user)
-.returning();
+/* =========================
+   TOKEN HELPERS
+========================= */
 
-return createdUser;
+export const generateAccessToken = (userId: string, role: string): string =>
+  jwt.sign({ userId, role }, ACCESS_SECRET, { expiresIn: "15m" });
+
+export const generateRefreshToken = (userId: string): string =>
+  jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: "7d" });
+
+export const verifyAccessToken = (token: string): { userId: string; role: string } =>
+  jwt.verify(token, ACCESS_SECRET) as { userId: string; role: string };
+
+export const verifyRefreshToken = (token: string): { userId: string } =>
+  jwt.verify(token, REFRESH_SECRET) as { userId: string };
+
+/* =========================
+   REGISTER
+========================= */
+
+export const registerService = async (input: {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  password: string;
+  phone?: string;
+}) => {
+  const existingEmail = await getUserByEmailService(input.email);
+  if (existingEmail) throw new Error("Email already in use");
+
+  const passwordHash = await bcrypt.hash(input.password, 10);
+  const user = await createUserService({ ...input, password: passwordHash });
+
+  return {
+    user,
+    accessToken: generateAccessToken(user.userId, user.role),
+    refreshToken: generateRefreshToken(user.userId),
+  };
 };
 
-// Get User By Email
-export const getUserByEmailService = async (
-email: string
-): Promise<TUserSelect | undefined> => {
-return await db.query.users.findFirst({
-where: eq(users.email, email),
-});
+/* =========================
+   LOGIN
+========================= */
+
+export const loginService = async (input: {
+  email: string;
+  password: string;
+}) => {
+  const user = await getUserByEmailService(input.email);
+  if (!user) throw new Error("Invalid email or password");
+  if (!user.isActive) throw new Error("Account is deactivated");
+
+  const match = await bcrypt.compare(input.password, user.password);
+  if (!match) throw new Error("Invalid email or password");
+
+  return {
+    user,
+    accessToken: generateAccessToken(user.userId, user.role),
+    refreshToken: generateRefreshToken(user.userId),
+  };
 };
 
-// Get User By Username
-export const getUserByUsernameService = async (
-username: string
-): Promise<TUserSelect | undefined> => {
-return await db.query.users.findFirst({
-where: eq(users.username, username),
-});
+/* =========================
+   REFRESH TOKEN
+========================= */
+
+export const refreshTokenService = async (refreshToken: string) => {
+  const { userId } = verifyRefreshToken(refreshToken);
+  const user = await getUserByIdService(userId);
+  if (!user) throw new Error("User not found");
+  if (!user.isActive) throw new Error("Account is deactivated");
+
+  return {
+    accessToken: generateAccessToken(user.userId, user.role),
+    refreshToken: generateRefreshToken(user.userId),
+  };
 };
 
-// Get User By Id
-export const getUserByIdService = async (
-userId: string
-): Promise<TUserSelect | undefined> => {
-return await db.query.users.findFirst({
-where: eq(users.userId, userId),
-});
-};
+/* =========================
+   CHANGE PASSWORD
+========================= */
 
-// Update Password
-export const updateUserPasswordService = async (
-userId: string,
-passwordHash: string
-): Promise<void> => {
-await db
-.update(users)
-.set({
-password: passwordHash,
-updatedAt: new Date(),
-})
-.where(eq(users.userId, userId));
+export const changePasswordService = async (
+  userId: string,
+  input: { currentPassword: string; newPassword: string }
+) => {
+  const user = await getUserByIdService(userId);
+  if (!user) throw new Error("User not found");
+
+  const match = await bcrypt.compare(input.currentPassword, user.password);
+  if (!match) throw new Error("Current password is incorrect");
+
+  const newHash = await bcrypt.hash(input.newPassword, 10);
+  await updateUserPasswordService(userId, newHash);
 };
