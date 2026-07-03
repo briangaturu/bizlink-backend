@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+
+# Cache
+.cache/
+
+# Drizzle
+drizzle/meta/_journal.json
+
+# Database files (if using SQLite)
+*.sqlite
+*.sqlite3
+
+# Uploads (if generated at runtime)
+uploads/
+
+# Testing
+.nyc_output/
+
+# Misc
+*.pid
+*.seed
+
+# Package manager
+.pnpm-store/
+
+# Local history
+.history/
+
+# Runtime
+*.tgz
