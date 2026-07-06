@@ -69,7 +69,7 @@ export const getListingByIdController = async (
   try {
     const { listingId } = req.params;
     const listing = await getListingByIdService(
-      listingId
+      listingId as string
     );
 
     if (!listing) {
@@ -101,7 +101,7 @@ export const getListingsByUserIdController = async (
   try {
     const { userId } = req.params;
     const listings =
-      await getListingsByUserIdService(userId);
+      await getListingsByUserIdService(userId as string);
 
     res.status(200).json({
       success: true,
@@ -124,7 +124,7 @@ export const getListingsByCategoryIdController = async (
   try {
     const { categoryId } = req.params;
     const listings =
-      await getListingsByCategoryIdService(categoryId);
+      await getListingsByCategoryIdService(categoryId as string);
 
     res.status(200).json({
       success: true,
@@ -149,7 +149,7 @@ export const getListingsBySubcategoryIdController =
       const { subcategoryId } = req.params;
       const listings =
         await getListingsBySubcategoryIdService(
-          subcategoryId
+          subcategoryId as string
         );
 
       res.status(200).json({
@@ -173,7 +173,7 @@ export const getListingsByStatusController = async (
   try {
     const { status } = req.params;
     const listings =
-      await getListingsByStatusService(status);
+      await getListingsByStatusService(status as string);
 
     res.status(200).json({
       success: true,
@@ -218,7 +218,7 @@ export const updateListingController = async (
   try {
     const { listingId } = req.params;
     const listing = await updateListingService(
-      listingId,
+      listingId as string,
       req.body
     );
 
@@ -246,8 +246,8 @@ export const updateListingStatusController = async (
     const { status } = req.body;
     const listing =
       await updateListingStatusService(
-        listingId,
-        status
+        listingId as string,
+        status as string
       );
 
     res.status(200).json({
@@ -271,7 +271,7 @@ export const incrementListingViewsController = async (
 ): Promise<void> => {
   try {
     const { listingId } = req.params;
-    await incrementListingViewsService(listingId);
+    await incrementListingViewsService(listingId as string);
 
     res.status(200).json({
       success: true,
@@ -293,7 +293,7 @@ export const deleteListingController = async (
 ): Promise<void> => {
   try {
     const { listingId } = req.params;
-    await deleteListingService(listingId);
+    await deleteListingService(listingId as string);
 
     res.status(200).json({
       success: true,
@@ -317,8 +317,8 @@ export const toggleFeaturedListingController = async (
     const { listingId } = req.params;
     const { isFeatured } = req.body;
     const listing = await toggleFeaturedListingService(
-      listingId,
-      isFeatured
+      listingId as string,
+      isFeatured as boolean
     );
 
     res.status(200).json({
@@ -466,7 +466,7 @@ export const getCategoryTrendingController = async (
     const { categoryId } = req.params;
     const { limit = 10 } = req.query;
     const listings = await getCategoryTrendingService(
-      categoryId,
+      categoryId as string,
       Number(limit)
     );
 

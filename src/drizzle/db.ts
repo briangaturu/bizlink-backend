@@ -10,10 +10,8 @@ if (!connectionString) {
 
 export const pool = new Pool({
   connectionString,
-  // If you're using Supabase/Neon/Render/etc, uncomment:
-  // ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false },
 });
-
 // Prevent server crash on unexpected disconnects
 pool.on("error", (err) => {
   console.error("Postgres pool error:", err);
